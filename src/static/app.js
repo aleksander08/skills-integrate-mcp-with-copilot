@@ -3,6 +3,26 @@ document.addEventListener("DOMContentLoaded", () => {
   const activitySelect = document.getElementById("activity");
   const signupForm = document.getElementById("signup-form");
   const messageDiv = document.getElementById("message");
+  const accountButton = document.getElementById("account-button");
+  const loginDialog = document.getElementById("login-dialog");
+  const loginForm = document.getElementById("login-form");
+  const loginMessage = document.getElementById("login-message");
+
+  let isTeacher = false;
+
+  function updateTeacherControls() {
+    signupForm.querySelector("input").disabled = !isTeacher;
+    signupForm.querySelector("select").disabled = !isTeacher;
+    signupForm.querySelector("button").disabled = !isTeacher;
+    document.querySelectorAll(".delete-btn").forEach((button) => {
+      button.disabled = !isTeacher;
+      button.title = isTeacher
+        ? "Remove student"
+        : "Teacher login required to remove students";
+    });
+    document.getElementById("teacher-hint").classList.toggle("hidden", isTeacher);
+    accountButton.textContent = isTeacher ? "Log out" : "Teacher login";
+  }
 
   // Function to fetch activities from API
   async function fetchActivities() {
@@ -60,6 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
       document.querySelectorAll(".delete-btn").forEach((button) => {
         button.addEventListener("click", handleUnregister);
       });
+      updateTeacherControls();
     } catch (error) {
       activitiesList.innerHTML =
         "<p>Failed to load activities. Please try again later.</p>";
@@ -153,6 +174,50 @@ document.addEventListener("DOMContentLoaded", () => {
       messageDiv.classList.remove("hidden");
       console.error("Error signing up:", error);
     }
+  });
+
+  accountButton.addEventListener("click", async () => {
+    if (isTeacher) {
+      await fetch("/auth/logout", { method: "POST" });
+      isTeacher = false;
+      updateTeacherControls();
+      return;
+    }
+    loginMessage.className = "hidden";
+    loginForm.reset();
+    loginDialog.showModal();
+  });
+
+  document.getElementById("close-login").addEventListener("click", () => {
+    loginDialog.close();
+  });
+
+  loginForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const response = await fetch("/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: document.getElementById("username").value,
+        password: document.getElementById("password").value,
+      }),
+    });
+
+    if (response.ok) {
+      isTeacher = true;
+      loginDialog.close();
+      updateTeacherControls();
+      return;
+    }
+
+    const result = await response.json();
+    loginMessage.textContent = result.detail || "Login failed";
+    loginMessage.className = "error";
+  });
+
+  fetch("/auth/me").then((response) => {
+    isTeacher = response.ok;
+    updateTeacherControls();
   });
 
   // Initialize app

@@ -16,12 +16,52 @@ body {
 }
 
 header {
+  position: relative;
   text-align: center;
   padding: 20px 0;
   margin-bottom: 30px;
   background-color: #1a237e;
   color: white;
   border-radius: 5px;
+}
+
+.account-button {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background-color: #3949ab;
+}
+
+dialog {
+  border: none;
+  border-radius: 5px;
+  padding: 25px;
+  max-width: 360px;
+  width: calc(100% - 30px);
+}
+
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+#login-form {
+  display: grid;
+  gap: 10px;
+}
+
+#login-form input {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.close-button {
+  justify-self: end;
+  padding: 2px 8px;
+  background: transparent;
+  color: #333;
+  font-size: 24px;
 }
 
 header h1 {
@@ -123,6 +163,18 @@ section h3 {
 
 .delete-btn:hover {
   background-color: #ffebee;
+}
+
+.delete-btn:disabled,
+#signup-form button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+#teacher-hint {
+  margin-top: 15px;
+  color: #666;
+  font-size: 14px;
 }
 
 .participants-section p {
